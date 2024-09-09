@@ -4,16 +4,16 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using static pluralsightfuncs.OnPaymentReceived;
-
+using System.Security.Cryptography;
 namespace pluralsightfuncs
 {
     public class GenerateLicenseFile
     {
         [FunctionName("GenerateLicenseFile")]
         public void Run([QueueTrigger("orders", Connection = "AzureWebJobsStorage")] Order order,
-            [Blob("azure-webjobs-secrets/{ran-guid}.lic")] TextWriter outputBlob, ILogger log)
+            [Blob("licenses/{rand-guid}.lic")] TextWriter outputBlob, ILogger log)
         {
-            outputBlob.WriteLine($"OriderId:{order.OrderId}");
+            outputBlob.WriteLine($"OrderId:{order.OrderId}");
             outputBlob.WriteLine($"Email: {order.Email}");
             outputBlob.WriteLine($"ProductId: {order.ProductId}");
             outputBlob.WriteLine($"PurchaseDate: {order.purchaseDate}");
