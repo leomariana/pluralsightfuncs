@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
+
 namespace pluralsightfuncs
 {
     public static class OnPaymentReceived
@@ -24,12 +25,15 @@ namespace pluralsightfuncs
             // /api e em seguida, o nome da função, no meu caso OnPaymentReceived
 
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+            [Queue("orders")] IAsyncCollector<Order> orderQueue,
             ILogger log)
         {
             log.LogInformation("Received a payment");
-
+            //Sempre que essa função for chamada eu gravo na fila orders a message contendo
+            //os detalhes do pedido
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var order = JsonConvert.DeserializeObject<Order>(requestBody);
+             var order = JsonConvert.DeserializeObject<Order>(requestBody);
+            await orderQueue.AddAsync(order);
 
             log.LogInformation($"Order {order.OrderId} received from {order.Email} for product {order.ProductId}");
 
@@ -42,6 +46,7 @@ namespace pluralsightfuncs
             public string ProductId { get; set; }
             public string Email { get; set; }
             public decimal Price { get; set; }
+            public DateTime purchaseDate { get; set; } = DateTime.UtcNow;
         }
     }
 }
